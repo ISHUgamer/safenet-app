@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SafeNet – Digital Safety App</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; background: #f0f4f8; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; }
+h2.app-title { font-size: 14px; color: #444; margin-bottom: 12px; font-weight: 400; }
+.phone-frame { width: 340px; border: 2px solid #ccc; border-radius: 36px; overflow: hidden; background: #fff; }
+.status-bar { background: #185FA5; color: white; font-size: 11px; padding: 8px 16px 6px; display: flex; justify-content: space-between; }
+.app-header { background: #185FA5; color: white; padding: 12px 16px 16px; text-align: center; }
+.app-header h1 { font-size: 16px; font-weight: 600; }
+.app-header p { font-size: 11px; opacity: 0.85; margin-top: 2px; }
+.nav-tabs { display: flex; border-bottom: 1px solid #e0e0e0; background: #fff; }
+.nav-tab { flex: 1; padding: 8px 4px; font-size: 10px; text-align: center; cursor: pointer; color: #888; border-bottom: 2px solid transparent; }
+.nav-tab.active { color: #185FA5; border-bottom: 2px solid #185FA5; font-weight: 600; }
+.screen { display: none; padding: 12px; min-height: 420px; }
+.screen.active { display: block; }
+.section-label { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.threat-card { border: 1px solid #e0e0e0; border-radius: 12px; padding: 10px 12px; margin-bottom: 10px; background: #fff; }
+.threat-badge { font-size: 10px; padding: 2px 8px; border-radius: 99px; font-weight: 600; display: inline-block; margin-bottom: 6px; }
+.badge-high { background: #FCEBEB; color: #A32D2D; }
+.badge-med { background: #FAEEDA; color: #854F0B; }
+.badge-low { background: #EAF3DE; color: #3B6D11; }
+.threat-title { font-size: 13px; font-weight: 600; color: #222; margin-bottom: 4px; }
+.threat-desc { font-size: 11px; color: #666; line-height: 1.5; }
+.tip-card { background: #E6F1FB; border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; display: flex; align-items: flex-start; gap: 8px; }
+.tip-icon { color: #185FA5; font-size: 18px; margin-top: 1px; flex-shrink: 0; }
+.tip-text { font-size: 12px; color: #0C447C; line-height: 1.5; }
+.tip-text strong { font-weight: 600; display: block; margin-bottom: 2px; font-size: 12px; }
+.score-display { text-align: center; padding: 10px; background: #f5f5f5; border-radius: 10px; margin-bottom: 12px; }
+.score-num { font-size: 28px; font-weight: 700; color: #185FA5; }
+.score-label { font-size: 11px; color: #888; }
+.quiz-q { font-size: 13px; font-weight: 600; color: #222; margin-bottom: 12px; line-height: 1.5; }
+.quiz-opt { display: block; width: 100%; text-align: left; padding: 9px 12px; margin-bottom: 7px; border: 1px solid #ddd; border-radius: 8px; font-size: 12px; cursor: pointer; background: #fff; color: #222; }
+.quiz-opt:hover { background: #f5f5f5; }
+.quiz-opt.correct { background: #EAF3DE; border-color: #3B6D11; color: #27500A; }
+.quiz-opt.wrong { background: #FCEBEB; border-color: #A32D2D; color: #791F1F; }
+.quiz-feedback { font-size: 11px; margin-top: 8px; padding: 8px 10px; border-radius: 8px; display: none; line-height: 1.5; }
+.quiz-feedback.show { display: block; }
+.quiz-feedback.good { background: #EAF3DE; color: #27500A; }
+.quiz-feedback.bad { background: #FCEBEB; color: #791F1F; }
+.next-btn { display: none; width: 100%; margin-top: 10px; padding: 9px; background: #185FA5; color: white; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; font-weight: 600; }
+.next-btn.show { display: block; }
+.chatbot-messages { height: 290px; overflow-y: auto; padding: 8px; background: #f5f5f5; border-radius: 10px; margin-bottom: 8px; }
+.msg { margin-bottom: 8px; display: flex; flex-direction: column; }
+.msg.bot { align-items: flex-start; }
+.msg.user { align-items: flex-end; }
+.msg-bubble { max-width: 85%; padding: 7px 10px; border-radius: 12px; font-size: 12px; line-height: 1.5; }
+.msg.bot .msg-bubble { background: #fff; color: #222; border: 1px solid #e0e0e0; border-radius: 4px 12px 12px 12px; }
+.msg.user .msg-bubble { background: #185FA5; color: white; border-radius: 12px 4px 12px 12px; }
+.chat-input-row { display: flex; gap: 6px; }
+.chat-input { flex: 1; font-size: 12px; padding: 7px 10px; border: 1px solid #ccc; border-radius: 99px; background: #fff; color: #222; outline: none; }
+.chat-send { width: 32px; height: 32px; background: #185FA5; border: none; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
+.bottom-nav { display: flex; border-top: 1px solid #e0e0e0; background: #fff; }
+.bottom-nav-item { flex: 1; padding: 8px 4px 6px; text-align: center; cursor: pointer; font-size: 9px; color: #888; }
+.bottom-nav-item.active { color: #185FA5; }
+.bottom-nav-item i { display: block; font-size: 20px; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+
+<h2 class="app-title">SafeNet – Digital Safety & Wellbeing App | Class 11 IP Project</h2>
+
+<div class="phone-frame">
+  <div class="status-bar">
+    <span>9:41</span>
+    <span>SafeNet ●●●</span>
+  </div>
+  <div class="app-header">
+    <h1>🛡️ SafeNet</h1>
+    <p>Digital Safety & Wellbeing</p>
+  </div>
+
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="switchTab('threats')">⚠️<br>Threats</div>
+    <div class="nav-tab" onclick="switchTab('tips')">💡<br>Tips</div>
+    <div class="nav-tab" onclick="switchTab('quiz')">✅<br>Quiz</div>
+    <div class="nav-tab" onclick="switchTab('chatbot')">💬<br>Assistant</div>
+  </div>
+
+  <!-- THREATS -->
+  <div id="screen-threats" class="screen active">
+    <p class="section-label">Latest Cyber Threats</p>
+    <div class="threat-card">
+      <span class="threat-badge badge-high">High Risk</span>
+      <div class="threat-title">AI Voice Phishing (Vishing)</div>
+      <div class="threat-desc">Scammers use AI to clone voices of family members to demand urgent money transfers. Always verify via callback.</div>
+    </div>
+    <div class="threat-card">
+      <span class="threat-badge badge-high">High Risk</span>
+      <div class="threat-title">UPI Fake QR Code Scam</div>
+      <div class="threat-desc">Fraudsters share QR codes that deduct money instead of sending it. Never scan unknown QR codes to receive money.</div>
+    </div>
+    <div class="threat-card">
+      <span class="threat-badge badge-med">Medium Risk</span>
+      <div class="threat-title">Fake Job Offer Messages</div>
+      <div class="threat-desc">WhatsApp messages offering high-paying part-time jobs that ask for a small "registration fee" upfront — it's a scam.</div>
+    </div>
+    <div class="threat-card">
+      <span class="threat-badge badge-low">Stay Alert</span>
+      <div class="threat-title">Public Wi-Fi Data Theft</div>
+      <div class="threat-desc">Avoid banking or sharing personal info on public Wi-Fi. Use mobile data or a VPN instead.</div>
+    </div>
+  </div>
+
+  <!-- TIPS -->
+  <div id="screen-tips" class="screen">
+    <p class="section-label">Safety Tips For You</p>
+    <div class="tip-card">
+      <span class="tip-icon">🔒</span>
+      <div class="tip-text"><strong>Use Strong Passwords</strong>Mix letters, numbers and symbols. Never reuse passwords across apps.</div>
+    </div>
+    <div class="tip-card">
+      <span class="tip-icon">📱</span>
+      <div class="tip-text"><strong>Enable Two-Factor Authentication</strong>Add an extra layer of security beyond just a password.</div>
+    </div>
+    <div class="tip-card">
+      <span class="tip-icon">👁️</span>
+      <div class="tip-text"><strong>Check App Permissions</strong>Deny camera, mic, or location access to apps that don't need it.</div>
+    </div>
+    <div class="tip-card">
+      <span class="tip-icon">🔄</span>
+      <div class="tip-text"><strong>Keep Apps Updated</strong>Updates patch security vulnerabilities. Enable auto-update on your phone.</div>
+    </div>
+    <div class="tip-card">
+      <span class="tip-icon">⏰</span>
+      <div class="tip-text"><strong>Limit Screen Time</strong>Set daily limits on social media. Take breaks every 45 minutes.</div>
+    </div>
+    <div class="tip-card">
+      <span class="tip-icon">🛡️</span>
+      <div class="tip-text"><strong>Report Cybercrime</strong>Visit cybercrime.gov.in or call 1930 to report online fraud in India.</div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="screen-quiz" class="screen">
+    <div class="score-display">
+      <div class="score-num" id="score-display">0 / 3</div>
+      <div class="score-label">Your Score</div>
+    </div>
+    <div id="quiz-area"></div>
+  </div>
+
+  <!-- CHATBOT -->
+  <div id="screen-chatbot" class="screen">
+    <p class="section-label">Ask the Safety Assistant</p>
+    <div class="chatbot-messages" id="chat-messages">
+      <div class="msg bot"><div class="msg-bubble">Hi! I'm your digital safety assistant. Ask me about phishing, passwords, scams, UPI, OTP, VPN, or cyberbullying! 👋</div></div>
+    </div>
+    <div class="chat-input-row">
+      <input class="chat-input" id="chat-input" placeholder="Type your question..." onkeydown="if(event.key==='Enter') sendChat()" />
+      <button class="chat-send" onclick="sendChat()">➤</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const tabs = ['threats','tips','quiz','chatbot'];
+  document.querySelectorAll('.nav-tab')[tabs.indexOf(name)].classList.add('active');
+  document.getElementById('screen-' + name).classList.add('active');
+}
+
+const questions = [
+  {
+    q: "You get a WhatsApp message saying you've won ₹50,000 from an unknown number. What should you do?",
+    options: ["Click the link to claim the prize", "Share it with friends", "Ignore and report the message", "Call the number back"],
+    correct: 2,
+    feedback: "✓ Correct! Unsolicited prize messages are almost always scams. Report and block the number.",
+    wrong: "✗ These messages are common lottery scams designed to steal your data or money. Always ignore and report."
+  },
+  {
+    q: "Which is the safest password for your email account?",
+    options: ["password123", "Your birthday (e.g. 01012009)", "Tr@vel$2024!Moon", "Your pet's name"],
+    correct: 2,
+    feedback: "✓ Correct! A strong password mixes uppercase, lowercase, numbers, and symbols.",
+    wrong: "✗ Simple, personal passwords are easy to guess. Use a mix of letters, numbers and symbols."
+  },
+  {
+    q: "Someone online asks for your school name, home address and phone number. You should:",
+    options: ["Share it, they seem friendly", "Share only your school name", "Share nothing and tell a trusted adult", "Ask them for their info first"],
+    correct: 2,
+    feedback: "✓ Correct! Never share personal details with strangers online. Always inform a trusted adult.",
+    wrong: "✗ Sharing personal info with strangers is dangerous. Always tell a trusted adult about such requests."
+  }
+];
+
+let current = 0, score = 0, answered = false;
+
+function renderQuiz() {
+  if (current >= questions.length) {
+    document.getElementById('quiz-area').innerHTML = '<div style="text-align:center;padding:20px">' +
+      '<div style="font-size:40px;margin-bottom:10px">' + (score===3?'🎉':score>=2?'👍':'📚') + '</div>' +
+      '<div style="font-size:16px;font-weight:700;color:#222;margin-bottom:6px">' + score + '/3 correct</div>' +
+      '<div style="font-size:12px;color:#666;margin-bottom:16px">' + (score===3?'Perfect! You are a cyber safety pro.':score>=2?'Great job! Review the tips to score higher.':'Keep learning! Check the Tips section.') + '</div>' +
+      '<button onclick="resetQuiz()" style="padding:9px 20px;background:#185FA5;color:white;border:none;border-radius:8px;font-size:12px;cursor:pointer;font-weight:600">Try Again</button></div>';
+    return;
+  }
+  const q = questions[current];
+  answered = false;
+  document.getElementById('quiz-area').innerHTML =
+    '<div style="font-size:11px;color:#888;margin-bottom:8px">Question ' + (current+1) + ' of ' + questions.length + '</div>' +
+    '<div class="quiz-q">' + q.q + '</div>' +
+    q.options.map((o,i) => '<button class="quiz-opt" onclick="answer(' + i + ')" id="opt-' + i + '">' + o + '</button>').join('') +
+    '<div class="quiz-feedback" id="feedback"></div>' +
+    '<button class="next-btn" id="next-btn" onclick="nextQ()">' + (current === questions.length-1 ? 'See Results →' : 'Next Question →') + '</button>';
+}
+
+function answer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  document.querySelectorAll('.quiz-opt').forEach(b => b.style.pointerEvents = 'none');
+  const fb = document.getElementById('feedback');
+  if (idx === q.correct) {
+    document.getElementById('opt-'+idx).classList.add('correct');
+    fb.textContent = q.feedback;
+    fb.className = 'quiz-feedback show good';
+    score++;
+  } else {
+    document.getElementById('opt-'+idx).classList.add('wrong');
+    document.getElementById('opt-'+q.correct).classList.add('correct');
+    fb.textContent = q.wrong;
+    fb.className = 'quiz-feedback show bad';
+  }
+  document.getElementById('score-display').textContent = score + ' / 3';
+  document.getElementById('next-btn').classList.add('show');
+}
+
+function nextQ() { current++; renderQuiz(); }
+function resetQuiz() { current = 0; score = 0; document.getElementById('score-display').textContent = '0 / 3'; renderQuiz(); }
+
+renderQuiz();
+
+const botReplies = {
+  "phishing": "Phishing is when scammers pretend to be trusted companies via fake emails or messages to steal your passwords or money. Always check the sender's email address carefully before clicking any link.",
+  "password": "A strong password is at least 12 characters long with a mix of uppercase, lowercase, numbers, and symbols. Example: Tr@vel$2024!Moon. Never use your name or birthday.",
+  "scam": "Common online scams in India include fake job offers, lottery wins, KYC update frauds, and romance scams. Remember: never pay money to receive money.",
+  "otp": "Never share your OTP with anyone — not even someone claiming to be from your bank. Legitimate organizations NEVER ask for OTPs over call or message.",
+  "vpn": "A VPN (Virtual Private Network) encrypts your internet connection, keeping your data private especially on public Wi-Fi networks. Good free options include ProtonVPN.",
+  "cyberbullying": "If you face cyberbullying: don't respond to the bully, screenshot the evidence, block them, and report to a trusted adult or on cybercrime.gov.in. You are not alone.",
+  "upi": "For UPI safety: never scan QR codes from strangers, always verify receiver details before paying, and remember — you never need to enter your PIN to RECEIVE money.",
+  "social media": "For social media safety: set your profile to private, don't accept requests from strangers, avoid sharing your location in real time, and think before you post.",
+  "virus": "To protect from viruses: install a trusted antivirus app, don't download apps from unknown sources, and avoid clicking suspicious links in messages or emails.",
+  "privacy": "Protect your privacy online by reviewing app permissions, using private browsing for sensitive searches, and never sharing personal details like your Aadhaar or bank info online."
+};
+
+function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  const messages = document.getElementById('chat-messages');
+  messages.innerHTML += '<div class="msg user"><div class="msg-bubble">' + msg + '</div></div>';
+  input.value = '';
+  setTimeout(function() {
+    const lower = msg.toLowerCase();
+    let reply = "I can help with: phishing, passwords, scams, OTP safety, VPNs, cyberbullying, UPI fraud, social media, virus protection, and privacy. Try asking about one of these!";
+    for (const key in botReplies) {
+      if (lower.includes(key)) { reply = botReplies[key]; break; }
+    }
+    messages.innerHTML += '<div class="msg bot"><div class="msg-bubble">' + reply + '</div></div>';
+    messages.scrollTop = messages.scrollHeight;
+  }, 600);
+  messages.scrollTop = messages.scrollHeight;
+}
+</script>
+</body>
+</html>
